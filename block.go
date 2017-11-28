@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/gob"
+	"log"
 	"strconv"
 	"time"
 )
@@ -29,6 +31,38 @@ func (b *Block) SetHash() {
 
 	// Save this hash in the block hash
 	b.Hash = hash[:]
+}
+
+func (b *Block) Serialize() []byte {
+	// A Buffer is a variable-sized buffer of bytes with Read and Write methods.
+	var result bytes.Buffer
+
+	// Link encoder to result
+	encoder := gob.NewEncoder(&result)
+
+	// Encode Block
+	err := encoder.Encode(b)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return result.Bytes()
+}
+
+func DeserializeBlock(d []byte) *Block {
+	var block Block
+
+	decoder := gob.NewDecoder(bytes.NewReader(d))
+
+	// Decode Block
+	err := decoder.Decode(&block)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &block
 }
 
 // Generate a new block
