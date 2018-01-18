@@ -2,35 +2,18 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/gob"
 	"log"
-	"strconv"
 	"time"
 )
 
 // Block structure (Bitcoin like)
 type Block struct {
 	Timestamp     int64
-	Data          []byte
+	Transaction   []*Transaction
 	PrevBlockHash []byte
 	Hash          []byte
 	Nonce         int
-}
-
-// Set Hash to the block
-func (b *Block) SetHash() {
-	// Convert timestamp int64 to string and put in a slice
-	timestamp := []byte(strconv.FormatInt(b.Timestamp, 10))
-
-	// Concatenate PrevBlockHash, Data, timestamp ([]byte{} for no separator)
-	headers := bytes.Join([][]byte{b.PrevBlockHash, b.Data, timestamp}, []byte{})
-
-	// Calculate sha256 for this slice of byte
-	hash := sha256.Sum256(headers)
-
-	// Save this hash in the block hash
-	b.Hash = hash[:]
 }
 
 func (b *Block) Serialize() []byte {
@@ -66,9 +49,9 @@ func DeserializeBlock(d []byte) *Block {
 }
 
 // Generate a new block
-func NewBlock(data string, prevBlockHash []byte) *Block {
+func NewBlock(transaction []*Transaction, prevBlockHash []byte) *Block {
 	// Init new block structure
-	block := &Block{time.Now().Unix(), []byte(data), prevBlockHash, []byte{}, 0}
+	block := &Block{time.Now().Unix(), transaction, prevBlockHash, []byte{}, 0}
 
 	// Init proof of work
 	pow := NewProofOfWork(block)
@@ -81,4 +64,8 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 	block.Nonce = nonce
 
 	return block
+}
+
+func NewGenesisBlock(coinbase *Transaction) *Block {
+	return NewBlock([]*Transaction{coinbase}, []byte{})
 }

@@ -6,9 +6,6 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-const dbFile = "blockchain.db"
-const blocksBucket = "blocks"
-
 // Blockchain structure
 type Blockchain struct {
 	last_block_hash []byte
